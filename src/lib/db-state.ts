@@ -75,7 +75,9 @@ export function getActiveDb(): Promise<ActiveDb | null> {
 
 /**
  * Sync view of the pointer cache — non-null only after getActiveDb() warmed
- * it (production instances pre-warm via instrumentation.ts register()).
+ * it. NOTE: instrumentation.ts register() runs in a separate bundle, so the
+ * app cannot rely on it to pre-warm this cache; db/index.ts bootstraps from
+ * env DATABASE_URL instead and rebinds async. Kept for tests/tooling.
  */
 export function getActiveDbSync(): ActiveDb | null {
   return cached?.state ?? null;

@@ -1,7 +1,7 @@
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import type { NeonHttpDatabase } from "drizzle-orm/neon-http";
-import { getActiveDb, getActiveDbSync, isNearExpiry, resetDbStateCache } from "../lib/db-state";
+import { getActiveDb, isNearExpiry, resetDbStateCache } from "../lib/db-state";
 import { rotateDb } from "../../scripts/rotate-db";
 import * as schema from "./schema";
 
@@ -46,18 +46,14 @@ function refreshUrl(): Promise<void> {
 export const db = new Proxy({} as NeonHttpDatabase<typeof schema>, {
   get(_target, prop) {
     if (!_db) {
-      // Prod: instrumentation.ts register() pre-warms the blob pointer cache
-      // before requests, so the pointer URL is the single source of truth
-      // (no Vercel DATABASE_URL env — it would go stale after rotation).
-      // Local/scripts: fall back to env DATABASE_URL (.env.local).
-      const pointer = getActiveDbSync();
-      if (pointer) {
-        _url = pointer.url;
-      } else {
-        _url = process.env.DATABASE_URL ?? "";
-        void refreshUrl(); // still rebind if the async read differs
-      }
+      // Sync bootstrap from env DATABASE_URL (Vercel prod + local .env.local),
+      // then refreshUrl() rebinds to the live blob pointer within ms and
+      // keeps rotation as a near-expiry backstop. Env staleness after a
+      // rotation is corrected on first DB access per instance, so the env
+      // URL is never a long-lived trap.
+      _url = process.env.DATABASE_URL ?? "";
       _db = createDb(_url);
+      void refreshUrl();
     }
     return (_db as unknown as Record<PropertyKey, unknown>)[prop];
   },
