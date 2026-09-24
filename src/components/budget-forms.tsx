@@ -68,8 +68,8 @@ function BudgetRowItem({ b, month }: { b: BudgetRow; month: string }) {
         {formatRp(b.used)} dari {formatRp(b.amount)} ({pct}%)
       </p>
 
-      <div className="mt-2 flex items-center gap-2">
-        <form action={formAction} className="flex items-center gap-2">
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        <form action={formAction} className="flex flex-wrap items-center gap-2">
           <input type="hidden" name="categoryId" value={b.categoryId} />
           <input type="hidden" name="month" value={month} />
           <input

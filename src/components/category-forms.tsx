@@ -93,7 +93,7 @@ export function EditCategoryForm({
   }
 
   return (
-    <form action={formAction} className="flex items-center gap-2 rounded-lg px-3 py-2">
+    <form action={formAction} className="flex flex-wrap items-center gap-2 rounded-lg px-3 py-2">
       <input
         name="icon"
         defaultValue={category.icon}
@@ -104,7 +104,7 @@ export function EditCategoryForm({
         name="name"
         required
         defaultValue={category.name}
-        className="flex-1 rounded-lg border border-neutral-300 px-3 py-1 text-sm outline-none focus:border-emerald-600"
+        className="min-w-0 flex-1 rounded-lg border border-neutral-300 px-3 py-1 text-sm outline-none focus:border-emerald-600"
       />
       <input type="hidden" name="type" value={category.type} />
       {state.error && <span className="text-xs text-red-700">{state.error}</span>}

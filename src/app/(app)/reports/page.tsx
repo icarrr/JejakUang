@@ -84,7 +84,7 @@ export default async function ReportsPage({
       </div>
 
       {/* Income / expense / net + comparison */}
-      <section className="grid grid-cols-3 gap-3">
+      <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <Card label="Pemasukan" value={`+${formatRp(report.income)}`} positive delta={comp.incomeDelta} />
         <Card label="Pengeluaran" value={`-${formatRp(report.expense)}`} negative delta={comp.expenseDelta} />
         <Card label="Net" value={formatRp(report.net)} delta={comp.netDelta} />

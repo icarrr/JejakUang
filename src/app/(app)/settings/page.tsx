@@ -64,22 +64,22 @@ async function CategoryGroup({
         {items.map((c) => (
           <li key={c.id}>
             {c.isDefault ? (
-              <div className="flex items-center justify-between rounded-lg bg-neutral-50 px-3 py-2">
-                <span className="text-sm">
+              <div className="flex min-w-0 items-center justify-between rounded-lg bg-neutral-50 px-3 py-2">
+                <span className="min-w-0 truncate text-sm">
                   {c.icon} {c.name}
                 </span>
-                <span className="text-xs text-neutral-400">bawaan</span>
+                <span className="shrink-0 text-xs text-neutral-400">bawaan</span>
               </div>
             ) : c.isActive ? (
               <EditCategoryForm
                 category={{ id: c.id, name: c.name, icon: c.icon, type: c.type }}
               />
             ) : (
-              <div className="flex items-center justify-between rounded-lg bg-neutral-50 px-3 py-2 opacity-60">
-                <span className="text-sm">
+              <div className="flex min-w-0 items-center justify-between rounded-lg bg-neutral-50 px-3 py-2 opacity-60">
+                <span className="min-w-0 truncate text-sm">
                   {c.icon} {c.name}
                 </span>
-                <span className="text-xs text-neutral-400">nonaktif</span>
+                <span className="shrink-0 text-xs text-neutral-400">nonaktif</span>
               </div>
             )}
           </li>

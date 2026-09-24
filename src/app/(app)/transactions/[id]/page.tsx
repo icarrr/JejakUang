@@ -48,7 +48,7 @@ export default async function TransactionDetailPage({
         <dl className="space-y-3 text-sm">
           <div className="flex justify-between">
             <dt className="text-neutral-500">Akun</dt>
-            <dd className="font-medium">
+            <dd className="min-w-0 break-words text-right font-medium">
               {tx.accountName}
               {tx.type === "TRANSFER" && destName ? ` → ${destName}` : ""}
             </dd>
@@ -68,7 +68,7 @@ export default async function TransactionDetailPage({
           {tx.notes && (
             <div className="flex justify-between gap-4">
               <dt className="shrink-0 text-neutral-500">Catatan</dt>
-              <dd className="text-right">{tx.notes}</dd>
+              <dd className="min-w-0 break-words text-right">{tx.notes}</dd>
             </div>
           )}
         </dl>

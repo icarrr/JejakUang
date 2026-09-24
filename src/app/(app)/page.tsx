@@ -71,7 +71,7 @@ export default async function DashboardPage({
           </section>
 
           {/* Income / Expense / Net + comparison vs prev month */}
-          <section className="grid grid-cols-3 gap-3">
+          <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <Card label="Pemasukan" value={`+${formatRp(report.income)}`} positive delta={comparison.incomeDelta} />
             <Card label="Pengeluaran" value={`-${formatRp(report.expense)}`} negative delta={comparison.expenseDelta} />
             <Card label="Selisih" value={formatRp(report.net)} delta={comparison.netDelta} />

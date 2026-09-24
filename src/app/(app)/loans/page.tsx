@@ -49,14 +49,14 @@ export default async function LoansPage() {
             <p className="text-xs text-neutral-400">Uang yang kamu pinjamkan ke orang lain</p>
             <ul className="mt-3 divide-y divide-neutral-100">
               {summary.piutang.map((p) => (
-                <li key={p.contactName} className="flex items-center justify-between py-2.5 text-sm">
+                <li key={p.contactName} className="flex min-w-0 items-center justify-between gap-3 py-2.5 text-sm">
                   <Link
                     href={`/transactions?q=${encodeURIComponent(p.contactName)}`}
-                    className="font-medium hover:underline"
+                    className="min-w-0 truncate font-medium hover:underline"
                   >
                     {p.contactName}
                   </Link>
-                  <span className="font-semibold text-emerald-700">{formatRp(p.remainingAmount)}</span>
+                  <span className="shrink-0 font-semibold text-emerald-700">{formatRp(p.remainingAmount)}</span>
                 </li>
               ))}
               {summary.piutang.length === 0 && (
@@ -74,14 +74,14 @@ export default async function LoansPage() {
             <p className="text-xs text-neutral-400">Uang yang kamu pinjam dari orang lain</p>
             <ul className="mt-3 divide-y divide-neutral-100">
               {summary.hutang.map((p) => (
-                <li key={p.contactName} className="flex items-center justify-between py-2.5 text-sm">
+                <li key={p.contactName} className="flex min-w-0 items-center justify-between gap-3 py-2.5 text-sm">
                   <Link
                     href={`/transactions?q=${encodeURIComponent(p.contactName)}`}
-                    className="font-medium hover:underline"
+                    className="min-w-0 truncate font-medium hover:underline"
                   >
                     {p.contactName}
                   </Link>
-                  <span className="font-semibold text-red-600">{formatRp(p.remainingAmount)}</span>
+                  <span className="shrink-0 font-semibold text-red-600">{formatRp(p.remainingAmount)}</span>
                 </li>
               ))}
               {summary.hutang.length === 0 && (
