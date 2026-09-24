@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { ServiceWorkerRegistration } from "@/components/service-worker";
 
@@ -39,6 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-full flex flex-col bg-neutral-50 text-neutral-900">
         {children}
         <ServiceWorkerRegistration />
+        <Analytics />
       </body>
     </html>
   );
