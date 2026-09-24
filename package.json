@@ -12,7 +12,9 @@
     "db:push": "drizzle-kit push",
     "db:provision": "tsx scripts/provision-db.ts",
     "db:seed-dummy": "node --env-file=.env.local --import tsx scripts/seed-dummy.ts",
-    "db:setup": "npm run db:provision && npm run db:seed-dummy"
+    "db:setup": "npm run db:provision && npm run db:seed-dummy",
+    "db:rotate": "tsx scripts/rotate-db.ts",
+    "db:rotate:force": "tsx scripts/rotate-db.ts --force"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",

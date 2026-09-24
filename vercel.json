@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/rotate-db",
+      "schedule": "0 4 * * *"
+    }
+  ]
+}
