@@ -39,14 +39,17 @@ const localStorage: ReceiptStorage = {
   },
 };
 
+const blobToken = () =>
+  process.env.STORAGE_BLOB_READ_WRITE_TOKEN ?? process.env.BLOB_READ_WRITE_TOKEN;
+
 const blobStorage: ReceiptStorage = {
   async put(file) {
     const fileName = `${Date.now()}-${crypto.randomUUID()}.${extFor(file.type)}`;
-    const { url } = await blobPut(fileName, file, { access: "public" });
+    const { url } = await blobPut(fileName, file, { access: "public", token: blobToken() });
     return { url };
   },
   async remove(url) {
-    await blobDelete(url).catch(() => {});
+    await blobDelete(url, { token: blobToken() }).catch(() => {});
   },
 };
 

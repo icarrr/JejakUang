@@ -37,11 +37,17 @@ export function resetDbStateCache(): void {
 let cached: { state: ActiveDb; at: number } | null = null;
 let inflight: Promise<ActiveDb | null> | null = null;
 
-const blobConfigured = () => !!process.env.STORAGE_BLOB_READ_WRITE_TOKEN;
+const blobConfigured = () => !!getBlobToken();
+
+/** SDK only auto-reads BLOB_READ_WRITE_TOKEN; we expose our own name and pass
+ *  it explicitly so no extra Vercel env var is needed. */
+function getBlobToken(): string | undefined {
+  return process.env.STORAGE_BLOB_READ_WRITE_TOKEN ?? process.env.BLOB_READ_WRITE_TOKEN;
+}
 
 async function readBlob(blobPath: string): Promise<unknown | null> {
   if (!blobConfigured()) return null;
-  const res = await get(blobPath, { access: "public" });
+  const res = await get(blobPath, { access: "public", token: getBlobToken() });
   if (!res || !res.stream) return null;
   return JSON.parse(await new Response(res.stream).text());
 }
@@ -81,6 +87,7 @@ export async function publishDbState(state: ActiveDb): Promise<void> {
     contentType: "application/json",
     cacheControlMaxAge: 60,
     allowOverwrite: true,
+    token: getBlobToken(),
   });
 }
 
@@ -96,6 +103,7 @@ export async function tryAcquireLock(): Promise<{ ok: true; token: string } | { 
       access: "public",
       contentType: "application/json",
       cacheControlMaxAge: 60,
+      token: getBlobToken(),
     });
     return { ok: true, token };
   } catch {
@@ -103,7 +111,7 @@ export async function tryAcquireLock(): Promise<{ ok: true; token: string } | { 
     const lock = (await readBlob(LOCK_PATH)) as { startedAt: string } | null;
     if (!lock) return { ok: true, token }; // vanished mid-check; ours now
     if (Date.now() - new Date(lock.startedAt).getTime() > LOCK_TTL_MS) {
-      await del(LOCK_PATH).catch(() => {});
+      await del(LOCK_PATH, { token: getBlobToken() }).catch(() => {});
       return tryAcquireLock();
     }
     return { ok: false, reason: "rotation already in progress (blob lock held)" };
@@ -112,5 +120,5 @@ export async function tryAcquireLock(): Promise<{ ok: true; token: string } | { 
 
 export async function releaseLock(): Promise<void> {
   if (!blobConfigured()) return;
-  await del(LOCK_PATH).catch(() => {});
+  await del(LOCK_PATH, { token: getBlobToken() }).catch(() => {});
 }
