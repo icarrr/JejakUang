@@ -5,7 +5,7 @@
  */
 import assert from "node:assert/strict";
 import bcrypt from "bcryptjs";
-import { asc, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "../src/db";
 import { categories, contacts, moneyAccounts, transactions, transfers, users } from "../src/db/schema";
 import { DEFAULT_CATEGORIES } from "../src/db/seed-categories";
