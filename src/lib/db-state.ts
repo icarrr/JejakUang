@@ -4,8 +4,10 @@
  * Vercel env is baked at deploy time, so the rotating Neon.new DB URL cannot
  * live in process.env. Every serverless instance reads the current pointer
  * from Blob (TTL-cached per instance) and falls back to DATABASE_URL.
+ *
+ * Edge-safe by design: token uses the global Web Crypto `crypto.randomUUID()`
+ * (present in Node 19+/V8 edge), so no node: import forces Node-only bundling.
  */
-import { randomUUID } from "node:crypto";
 import { del, get, put } from "@vercel/blob";
 
 export interface ActiveDb {
@@ -63,6 +65,14 @@ export function getActiveDb(): Promise<ActiveDb | null> {
   return inflight;
 }
 
+/**
+ * Sync view of the pointer cache — non-null only after getActiveDb() warmed
+ * it (production instances pre-warm via instrumentation.ts register()).
+ */
+export function getActiveDbSync(): ActiveDb | null {
+  return cached?.state ?? null;
+}
+
 /** Switch the app to a freshly rotated DB. */
 export async function publishDbState(state: ActiveDb): Promise<void> {
   if (!blobConfigured()) return;
@@ -80,7 +90,7 @@ export async function publishDbState(state: ActiveDb): Promise<void> {
  */
 export async function tryAcquireLock(): Promise<{ ok: true; token: string } | { ok: false; reason: string }> {
   if (!blobConfigured()) return { ok: true, token: "local-noop" };
-  const token = randomUUID();
+  const token = crypto.randomUUID();
   try {
     await put(LOCK_PATH, JSON.stringify({ startedAt: new Date().toISOString(), token }), {
       access: "public",
