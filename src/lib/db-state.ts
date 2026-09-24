@@ -47,7 +47,9 @@ function getBlobToken(): string | undefined {
 
 async function readBlob(blobPath: string): Promise<unknown | null> {
   if (!blobConfigured()) return null;
-  const res = await get(blobPath, { access: "public", token: getBlobToken() });
+  // Store is private (pointer carries the DB password — keep it non-public);
+  // all reads/writes go through the token-auth SDK.
+  const res = await get(blobPath, { access: "private", token: getBlobToken() });
   if (!res || !res.stream) return null;
   return JSON.parse(await new Response(res.stream).text());
 }
@@ -83,7 +85,7 @@ export function getActiveDbSync(): ActiveDb | null {
 export async function publishDbState(state: ActiveDb): Promise<void> {
   if (!blobConfigured()) return;
   await put(POINTER_PATH, JSON.stringify(state), {
-    access: "public",
+    access: "private",
     contentType: "application/json",
     cacheControlMaxAge: 60,
     allowOverwrite: true,
@@ -100,7 +102,7 @@ export async function tryAcquireLock(): Promise<{ ok: true; token: string } | { 
   const token = crypto.randomUUID();
   try {
     await put(LOCK_PATH, JSON.stringify({ startedAt: new Date().toISOString(), token }), {
-      access: "public",
+      access: "private",
       contentType: "application/json",
       cacheControlMaxAge: 60,
       token: getBlobToken(),
