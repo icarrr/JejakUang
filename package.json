@@ -11,6 +11,7 @@
     "db:migrate": "node --env-file=.env.local --import tsx scripts/migrate.ts",
     "db:push": "drizzle-kit push",
     "db:seed-dummy": "node --env-file=.env.local --import tsx scripts/seed-dummy.ts",
+    "db:seed-history": "node --env-file=.env.local --import tsx scripts/seed-history.ts",
     "db:setup": "npm run db:migrate && npm run db:seed-dummy"
   },
   "dependencies": {
