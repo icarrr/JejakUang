@@ -199,12 +199,10 @@ It asserts the balance rules from the PRD: income/expense effects, transfers tha
 
 Deploy to Vercel (a push to the production branch triggers an automatic deployment):
 
-1. Create a Neon project for production and set its connection string.
-2. In Vercel project settings, set the environment variables:
-   - `DATABASE_URL`, `AUTH_SECRET`, `AUTH_URL` (production URL), `STORAGE_DRIVER=blob`, `STORAGE_BLOB_READ_WRITE_TOKEN`.
-3. Deploy, then verify: register/login works, balances match, receipts upload and display.
-
-Recommendation: use separate environments (development vs production) with separate Neon databases, following the same layout as local development.
+1. In Vercel project settings, set the environment variables:
+   - `AUTH_SECRET`, `AUTH_URL` (production URL), `STORAGE_DRIVER=blob`, `STORAGE_BLOB_READ_WRITE_TOKEN`, `CRON_SECRET`.
+   - No `DATABASE_URL`: the prod DB is a Neon.new ephemeral Postgres (72h TTL) that auto-rotates before expiry. The active connection is published to Vercel Blob (`jejakuang/db.json`) by the rotation flow — GitHub Actions (hourly, secret `CRON_SECRET` + variable `PROD_URL`) plus the Vercel daily cron (`/api/cron/rotate-db`). The first scheduled run bootstraps an empty DB shortly after deploy; expect DB-dependent requests to fail until then.
+2. Deploy, then verify: register/login works, balances match, receipts upload and display.
 
 ## Security & Privacy
 
@@ -214,7 +212,7 @@ This application handles personal financial data. Design principles:
 - Passwords are hashed with bcrypt (cost 10); sessions use JWT via NextAuth.
 - All input is validated server-side with Zod (amounts, dates, ownership of accounts/categories/contacts, receipt file type and size).
 - Receipts are validated (JPG/JPEG/PNG/WebP, ≤5 MB) and access is owner-only through transaction detail.
-- Server-side secrets (`DATABASE_URL`, `AUTH_SECRET`, `STORAGE_BLOB_READ_WRITE_TOKEN`) live only in environment variables and are never sent to the browser.
+- Server-side secrets (`AUTH_SECRET`, `STORAGE_BLOB_READ_WRITE_TOKEN`, `CRON_SECRET`) live only in environment variables and are never sent to the browser. The active DB connection string lives in Vercel Blob, readable only with the same token.
 - No functionality relies on client-side filtering for authorization.
 
 ## Roadmap
