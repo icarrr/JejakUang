@@ -200,8 +200,8 @@ It asserts the balance rules from the PRD: income/expense effects, transfers tha
 Deploy to Vercel (a push to the production branch triggers an automatic deployment):
 
 1. In Vercel project settings, set the environment variables:
-   - `AUTH_SECRET`, `AUTH_URL` (production URL), `STORAGE_DRIVER=blob`, `STORAGE_BLOB_READ_WRITE_TOKEN`, `CRON_SECRET`.
-   - No `DATABASE_URL`: the prod DB is a Neon.new ephemeral Postgres (72h TTL) that auto-rotates before expiry. The active connection is published to Vercel Blob (`jejakuang/db.json`) by the rotation flow — GitHub Actions (hourly, secret `CRON_SECRET` + variable `PROD_URL`) plus the Vercel daily cron (`/api/cron/rotate-db`). The first scheduled run bootstraps an empty DB shortly after deploy; expect DB-dependent requests to fail until then.
+   - `DATABASE_URL` (any live Neon.new connection — sync bootstrap; the app rebinds to the blob pointer on first access), `AUTH_SECRET`, `AUTH_URL` (production URL), `STORAGE_DRIVER=blob`, `STORAGE_BLOB_READ_WRITE_TOKEN`, `CRON_SECRET`.
+   - The prod DB is a Neon.new ephemeral Postgres (72h TTL) that auto-rotates before expiry; the active connection is published to Vercel Blob (`jejakuang/db.json`) by the rotation flow — GitHub Actions (hourly, secret `CRON_SECRET` + variable `PROD_URL`) plus the Vercel daily cron (`/api/cron/rotate-db`). The first scheduled run bootstraps an empty DB shortly after deploy; expect DB-dependent requests to fail until then.
 2. Deploy, then verify: register/login works, balances match, receipts upload and display.
 
 ## Security & Privacy
