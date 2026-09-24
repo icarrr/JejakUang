@@ -4,10 +4,5 @@
       "path": "/api/cron/rotate-db",
       "schedule": "0 4 * * *"
     }
-  ],
-  "functions": {
-    "src/app/api/cron/rotate-db/route.ts": {
-      "includeFiles": "drizzle/**"
-    }
-  }
+  ]
 }
