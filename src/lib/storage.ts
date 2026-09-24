@@ -42,14 +42,17 @@ const localStorage: ReceiptStorage = {
 const blobToken = () =>
   process.env.STORAGE_BLOB_READ_WRITE_TOKEN ?? process.env.BLOB_READ_WRITE_TOKEN;
 
+/** fileUrl is the authed proxy path; the row's fileName is the blob pathname. */
 const blobStorage: ReceiptStorage = {
   async put(file) {
     const fileName = `${Date.now()}-${crypto.randomUUID()}.${extFor(file.type)}`;
-    const { url } = await blobPut(fileName, file, { access: "public", token: blobToken() });
-    return { url };
+    await blobPut(fileName, file, { access: "private", token: blobToken() });
+    return { url: `/api/receipts/${fileName}` };
   },
   async remove(url) {
-    await blobDelete(url, { token: blobToken() }).catch(() => {});
+    const prefix = "/api/receipts/";
+    if (!url.startsWith(prefix)) return;
+    await blobDelete(url.slice(prefix.length), { token: blobToken() }).catch(() => {});
   },
 };
 
