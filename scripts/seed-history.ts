@@ -93,6 +93,15 @@ async function main() {
   }
   const uid = user.id;
 
+  // Guard BEFORE any insert: re-runs must be no-ops unless --reset.
+  const marker = await db.query.transactions.findFirst({
+    where: and(eq(transactions.userId, uid), eq(transactions.description, MARKER)),
+  });
+  if (!reset && marker) {
+    console.log(`History already seeded for ${email} (marker found). Nothing to do.`);
+    return;
+  }
+
   if (reset) {
     await db.delete(budgets).where(eq(budgets.userId, uid));
     await db.delete(loans).where(eq(loans.userId, uid));
@@ -127,14 +136,6 @@ async function main() {
       .values({ userId: uid, name: s.name, type: s.type, initialBalance: s.initial })
       .returning();
     acct.set(s.key, { id: row.id, balance: s.initial });
-  }
-
-  const marker = await db.query.transactions.findFirst({
-    where: and(eq(transactions.userId, uid), eq(transactions.description, MARKER)),
-  });
-  if (marker) {
-    console.log(`History already seeded for ${email} (marker found). Nothing to do.`);
-    return;
   }
 
   const contactIds = new Map<string, string>();
