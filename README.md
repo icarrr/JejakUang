@@ -67,7 +67,7 @@ JejakUang is a statement of facts, not a judgment: it shows you the numbers with
 
 - Node.js (version compatible with Next.js 16)
 - npm
-- A Neon PostgreSQL database — either your own project or an ephemeral dev database created via `npm run db:provision`
+- A Neon PostgreSQL database (a permanent project, shared by local development and production)
 - A Vercel Blob store token (only when `STORAGE_DRIVER=blob`)
 
 ## Getting Started
@@ -88,7 +88,7 @@ DATABASE_URL=<your-value-here>
 AUTH_SECRET=<openssl rand -base64 32>
 ```
 
-`npm run db:provision` can create an ephemeral Neon database for development automatically (see [Database](#database)).
+`npm run db:setup` applies migrations and seeds the demo user against `DATABASE_URL` (see [Database](#database)).
 
 ### Environment Variables
 
@@ -126,7 +126,7 @@ jejakuang/
 │   └── proxy.ts       # Middleware auth + route matcher
 ├── drizzle/           # Generated SQL migrations
 ├── public/            # Static assets, service worker, local receipt uploads
-├── scripts/           # Dev tooling: DB provisioning, seeding, smoke tests
+├── scripts/           # Dev tooling: seeding, smoke tests
 ├── .env.example
 ├── drizzle.config.ts
 ├── next.config.ts
@@ -168,11 +168,11 @@ npm run db:migrate    # apply migrations to the database
 npm run db:push       # push schema directly (dev only)
 ```
 
-- **Ephemeral dev database:** `npm run db:provision` creates a short-lived Neon Claimable Postgres, writes `DATABASE_URL` into `.env.local` (preserving your other keys), generates an `AUTH_SECRET` on first run, and applies migrations.
-- **Seed data:** `npm run db:seed-dummy` creates a demo user (`demo@jejakuang.dev` / `demo1234`) with accounts, default categories, and sample transactions. `npm run db:setup` runs provisioning + seeding together.
+- **Permanent database:** a single Neon PostgreSQL project is shared between local development and production. Point `DATABASE_URL` in `.env.local` (local) and in the Vercel project settings (production) at the same connection string, then apply migrations with `npm run db:migrate`.
+- **Seed data:** `npm run db:seed-dummy` creates a demo user (`demo@jejakuang.dev` / `demo1234`) with accounts, default categories, and sample transactions. `npm run db:setup` runs migrations + seeding together.
 - **Important tables:** `users`, `money_accounts`, `categories`, `contacts`, `transactions`, `transfers`, `loans`, `receipts`, `budgets`.
 
-> Development should use a separate Neon database from production. Never point `DATABASE_URL` at a production database during development.
+> The shared connection string means local changes land in the same database as production. Create and point at a separate Neon project if you want isolated environments.
 
 ## Development
 
@@ -200,8 +200,7 @@ It asserts the balance rules from the PRD: income/expense effects, transfers tha
 Deploy to Vercel (a push to the production branch triggers an automatic deployment):
 
 1. In Vercel project settings, set the environment variables:
-   - `DATABASE_URL` (any live Neon.new connection — sync bootstrap; the app rebinds to the blob pointer on first access), `AUTH_SECRET`, `AUTH_URL` (production URL), `STORAGE_DRIVER=blob`, `STORAGE_BLOB_READ_WRITE_TOKEN`, `CRON_SECRET`.
-   - The prod DB is a Neon.new ephemeral Postgres (72h TTL) that auto-rotates before expiry; the active connection is published to Vercel Blob (`jejakuang/db.json`) by the rotation flow — GitHub Actions (hourly, secret `CRON_SECRET` + variable `PROD_URL`) plus the Vercel daily cron (`/api/cron/rotate-db`). The first scheduled run bootstraps an empty DB shortly after deploy; expect DB-dependent requests to fail until then.
+   - `DATABASE_URL` (permanent Neon connection string, same as local), `AUTH_SECRET`, `AUTH_URL` (production URL), `STORAGE_DRIVER=blob`, `STORAGE_BLOB_READ_WRITE_TOKEN`.
 2. Deploy, then verify: register/login works, balances match, receipts upload and display.
 
 ## Security & Privacy
@@ -212,7 +211,7 @@ This application handles personal financial data. Design principles:
 - Passwords are hashed with bcrypt (cost 10); sessions use JWT via NextAuth.
 - All input is validated server-side with Zod (amounts, dates, ownership of accounts/categories/contacts, receipt file type and size).
 - Receipts are validated (JPG/JPEG/PNG/WebP, ≤5 MB) and access is owner-only through transaction detail.
-- Server-side secrets (`AUTH_SECRET`, `STORAGE_BLOB_READ_WRITE_TOKEN`, `CRON_SECRET`) live only in environment variables and are never sent to the browser. The active DB connection string lives in Vercel Blob, readable only with the same token.
+- Server-side secrets (`DATABASE_URL`, `AUTH_SECRET`, `STORAGE_BLOB_READ_WRITE_TOKEN`) live only in environment variables and are never sent to the browser.
 - No functionality relies on client-side filtering for authorization.
 
 ## Roadmap

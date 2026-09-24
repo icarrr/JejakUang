@@ -1,5 +1,5 @@
 /**
- * Integration smoke test against the live (provisioned) Neon DB.
+ * Integration smoke test against the configured Neon DB (permanent project).
  * Verifies balance math + loan ledger for all transaction types.
  * Usage: npx tsx scripts/smoke-db.ts
  */

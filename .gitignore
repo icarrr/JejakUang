@@ -17,8 +17,6 @@
 .env
 .env.local
 .env*.local
-.env.vercel
-.env.github
 
 # typescript
 *.tsbuildinfo
